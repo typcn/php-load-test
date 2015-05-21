@@ -51,24 +51,27 @@ request_num = 350000
 
 
 def check_php_multipartform_dos(url, post_body, headers, ip):
-    proxy_handler = urllib2.ProxyHandler({"http": ip})
-    null_proxy_handler = urllib2.ProxyHandler({})
-    opener = urllib2.build_opener(proxy_handler)
-    urllib2.install_opener(opener)
-    req = urllib2.Request(url)
-    for key in headers.keys():
-        req.add_header(key, headers[key])
-    starttime = datetime.datetime.now()
-    fd = urllib2.urlopen(req, post_body)
-    html = fd.read()
-    endtime = datetime.datetime.now()
-    usetime = (endtime - starttime).seconds
-    if(usetime > 5):
-        result = url+" is vulnerable"
-    else:
-        if(usetime > 3):
-            result = "need to check normal respond time"
-    return [result, usetime]
+    try:
+        proxy_handler = urllib2.ProxyHandler({"http": ip})
+        null_proxy_handler = urllib2.ProxyHandler({})
+        opener = urllib2.build_opener(proxy_handler)
+        urllib2.install_opener(opener)
+        req = urllib2.Request(url)
+        for key in headers.keys():
+            req.add_header(key, headers[key])
+        starttime = datetime.datetime.now()
+        fd = urllib2.urlopen(req, post_body)
+        html = fd.read()
+        endtime = datetime.datetime.now()
+        usetime = (endtime - starttime).seconds
+        if(usetime > 5):
+            result = url+" is vulnerable"
+        else:
+            if(usetime > 3):
+                result = "need to check normal respond time"
+        return [result, usetime]
+    except KeyboardInterrupt:
+        exit()
 # end
 
 
